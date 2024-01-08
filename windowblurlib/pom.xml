@@ -1,0 +1,274 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+        <groupId>com.carlfx.windowblur</groupId>
+        <artifactId>windowblur</artifactId>
+        <version>1.0</version>
+    </parent>
+	
+	<groupId>com.carlfx</groupId>
+	<artifactId>windowblurlib</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<name>Window Blur Effects Library</name>
+	<description>A thin bridge that allows for two-way communication from Java to Objective-C.</description>
+
+	<profiles>
+		<profile>
+			<activation>
+				<property>
+					<name>release</name>
+				</property>
+			</activation>
+			<properties>
+				<xcodeScheme>Release</xcodeScheme>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.release>11</maven.compiler.release>
+		<xcodeScheme>Debug</xcodeScheme>
+	</properties>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<inceptionYear>2023</inceptionYear>
+
+	<organization>
+		<name>CarlFX</name>
+		<url>https://carlfx.wordpress.org/</url>
+	</organization>
+
+	<!-- <issueManagement>
+		<system>github</system>
+		<url>https://github.com/carldea//issues</url>
+	</issueManagement> -->
+
+	<!-- <url>https://github.com/shannah/Java-Objective-C-Bridge</url> -->
+
+	<!-- <scm>
+		<connection>scm:git:https://github.com/shannah/Java-Objective-C-Bridge.git</connection>
+		<developerConnection>scm:git:https://github.com/shannah/Java-Objective-C-Bridge.git</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/shannah/Java-Objective-C-Bridge</url>
+	</scm> -->
+
+    <distributionManagement>
+        <repository>
+            <id>nexus-staging</id>
+            <name>Nexus Release Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+	<build>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>3.4.2</version>
+			</extension>
+		</extensions>
+
+		<plugins>
+			<!-- native build -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>xcodebuild</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<executable>xcodebuild</executable>
+					<arguments>
+						<argument>-scheme</argument>
+						<argument>WindowBlur</argument>
+						<argument>-configuration</argument>
+						<argument>${xcodeScheme}</argument>
+						<argument>CONFIGURATION_BUILD_DIR=${project.build.outputDirectory}</argument>
+						<argument>build</argument>
+					</arguments>
+				</configuration>
+			</plugin>
+
+			<!-- add java 11 module name to manifest -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.0</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Automatic-Module-Name>windowblur</Automatic-Module-Name>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<!-- CODE ANALYSIS -->
+			<plugin>
+				<groupId>com.github.spotbugs</groupId>
+				<artifactId>spotbugs-maven-plugin</artifactId>
+				<version>4.2.0</version>
+				<configuration>
+					<effort>more</effort>
+					<jvmArgs>--add-opens java.base/java.lang=ALL-UNNAMED
+						--illegal-access=deny</jvmArgs>
+				</configuration>
+				<executions>
+					<!-- Ensures that spotbugs inspects source code when project is deployed. -->
+<!-- 					<execution> -->
+<!-- 						<id>analyze-deploy</id> -->
+<!-- 						<phase>deploy</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>check</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+				</executions>
+			</plugin>
+
+			
+		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.0.0-M5</version>
+					<configuration>
+						<trimStackTrace>false</trimStackTrace>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.2.1</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar-no-fork</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.2.0</version>
+					<configuration>
+						<failOnError>false</failOnError>
+						<!-- <additionalparam>-Xdoclint:none</additionalparam> -->
+						<additionalOptions>--allow-script-in-comments </additionalOptions>
+						<useStandardDocletOptions>false</useStandardDocletOptions>
+
+						<quiet>true</quiet>
+						<!-- does not work with revision property! -->
+						<ignoreClirr>true</ignoreClirr>
+
+						<detectLinks>false</detectLinks>
+						<detectOfflineLinks>false</detectOfflineLinks>
+						<doclint>all,-html,-syntax</doclint>
+						<version>false</version>
+						<nosince>true</nosince>
+						<author>false</author>
+						<defaultAuthor>mojo2012</defaultAuthor>
+						<defaultVersion>1.0</defaultVersion>
+						<level>public</level>
+					</configuration>
+					<executions>
+						<execution>
+							<id>attach-javadocs</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.6</version>
+					<configuration>
+						<!-- This is necessary for gpg to not try to use the pinentry programs -->
+						<gpgArguments>
+							<arg>--pinentry-mode</arg>
+							<arg>loopback</arg>
+						</gpgArguments>
+					</configuration>
+					<executions>
+						<execution>
+							<id>sign-artifacts</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>sign</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna</artifactId>
+			<version>5.13.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna-platform</artifactId>
+			<version>5.13.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.7.0</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
