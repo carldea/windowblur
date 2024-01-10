@@ -13,7 +13,8 @@ public class TestUtil {
 //        WindowBlurLibrary.INSTANCE.testFunctionC(nsString);
 
         NativeLong nsWindow = new NativeLong(windowPtr);
-        WindowBlurLibrary.INSTANCE.testFunctionC(nsWindow);
+//        WindowBlurLibrary.INSTANCE.testFunctionC(nsWindow);
+        WindowBlurLibrary.INSTANCE.testFunctionC2(nsWindow);
 
 //        Pointer testFunction1Sel = WindowBlurLibrary.INSTANCE.sel_registerName("testFunction1:");
 //        Pointer windowPointer = new Pointer(windowPtr);

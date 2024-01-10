@@ -34,4 +34,5 @@ public interface WindowBlurLibrary extends Library {
     //NativeLong objc_msgSend(NativeLong receiver, Pointer selector, NativeLong ...objAddress);
 
     void testFunctionC(NativeLong address);
+    void testFunctionC2(NativeLong address);
 }

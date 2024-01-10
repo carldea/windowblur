@@ -9,6 +9,7 @@
 #import <AppKit/AppKit.h>
 
 void testFunctionC(void* windowptr);
+void testFunctionC2(void* windowptr);
 
 @interface WindowBlur : NSObject
     + (void) testFunction1:(id)windowptr;

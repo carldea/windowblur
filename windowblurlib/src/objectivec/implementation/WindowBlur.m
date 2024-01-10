@@ -42,6 +42,40 @@ void testFunctionC(void* windowptr) {
     
 }
 
+void testFunctionC2(void* windowptr) {
+    NSLog(@"testFunctionC2 was called");
+    long myLongValue = (long)windowptr;
+    NSLog(@"testFunctionC2 myLongValue = %ld", myLongValue);
+
+    NSWindow* win = (__bridge NSWindow*)(windowptr);
+    NSLog(@"NSWindow = %@", win);
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSView* hostView = win.contentView;
+
+        if (hostView != nil && hostView.subviews.count) {
+            NSLog(@"  Before NSVisualEffectView creation subviews.count = %lu", hostView.subviews.count);
+
+            NSView* jfxView = hostView.subviews[0];
+            // Remove jfxView from its current superview
+            [jfxView removeFromSuperview];
+
+            NSVisualEffectView *vfxView = [[NSVisualEffectView alloc] initWithFrame:[win.contentView bounds]];
+            [vfxView setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
+            [vfxView setBlendingMode:NSVisualEffectBlendingModeBehindWindow];
+            [vfxView setMaterial:NSVisualEffectMaterialUnderWindowBackground];
+
+            // Add jfxView to vfxView
+            [vfxView addSubview:jfxView];
+            [jfxView setFrame:vfxView.bounds];  // Make sure jfxView fills the vfxView
+
+            // Add vfxView to hostView
+            [hostView addSubview:vfxView positioned:NSWindowBelow relativeTo:nil];
+            [vfxView setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
+        }
+    });
+}
+
 @implementation WindowBlur
       + (void) testFunction1:(id)windowptr {
 //          NSLog(@"testFunction1:windowptr was called windowptr=%@", windowptr);
