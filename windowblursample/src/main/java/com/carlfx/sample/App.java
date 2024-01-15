@@ -18,7 +18,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-
+        // must use UNIFIED style for effect to work.
         stage.initStyle(StageStyle.UNIFIED);
         stage.setOnShown((windowEvent -> {
             System.out.println("Before invocation of blur effect");
@@ -32,10 +32,14 @@ public class App extends Application {
         var label = new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
         var root = new StackPane(label);
         //root.setOpacity(0);
+
         var scene = new Scene(root, 640, 480);
+        // Must use a transparent fill of the scene & root pane's background's alpha channel to work.
+        scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        scene.getRoot().setStyle("-fx-background-color: rgba(255, 255, 255, 0.5);");
 
         //scene.getRoot().setOpacity(.50);
-//        stage.setOpacity(.50);
+        //stage.setOpacity(.50);
         stage.setScene(scene);
         stage.show();
 
