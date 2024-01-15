@@ -9,14 +9,16 @@
 #import "Foundation/Foundation.h"
 #import "AppKit/AppKit.h"
 
-void testFunctionC(void* windowptr) {
+void testFunctionC(void* windowptr, NSString *nsAppearanceName) {
     NSLog(@"testFunctionC was called");
     long myLongValue = (long)windowptr;
     NSLog(@"testFunctionC myLongValue = %ld", myLongValue);
-//    
-//    NSString* testString = (__bridge NSString*)(windowptr);
-//    NSLog(@"testFunctionC testString = %@", testString);
-//    
+
+    // converting C string into a NSString
+    //NSString *myNSString = [NSString stringWithUTF8String:nsAppearanceName];
+    NSLog(@"testFunctionC nsAppearanceName = %@", nsAppearanceName);
+
+    // Casting pointer into a NSWindow pointer
     NSWindow* win = (__bridge NSWindow*)(windowptr);
     NSLog(@"NSWindow = %@", win);
     
@@ -27,9 +29,34 @@ void testFunctionC(void* windowptr) {
         if (hostView != nil && hostView.subviews.count) {
             NSLog(@"  Before NSVisualEffectView creation subviews.count = %lu", hostView.subviews.count);
 
+            NSMutableArray *mutableSubviews = [hostView.subviews mutableCopy];
+            for (NSView *subview in [mutableSubviews copy]) {
+                // Perform some condition to determine if the subview should be removed
+                if ([subview isKindOfClass:[NSVisualEffectView class]]) {
+                    [subview removeFromSuperview];
+                    [mutableSubviews removeObject:subview];
+                }
+            }
+
+            // Now, mutableSubviews contains the modified array with items removed
+            [hostView setSubviews:mutableSubviews];
+            
+            // iterate over sub views
+            NSArray *subviews = [hostView subviews];
+            NSUInteger count = [subviews count];
+
+            for (NSUInteger i = 0; i < count; i++) {
+                NSView *subview = [subviews objectAtIndex:i];
+                
+                // Perform operations on each subview
+                NSLog(@"->>>>> %@", subview);
+            }
+            
             NSView* jfxView = hostView.subviews[0];
+            // if one already exists then remove it.
+            
             NSVisualEffectView *vfxView = [[NSVisualEffectView alloc] initWithFrame:[win.contentView bounds]];
-            [vfxView setAppearance:[NSAppearance appearanceNamed:NSAppearanceNameVibrantDark]];
+            [vfxView setAppearance:[NSAppearance appearanceNamed:nsAppearanceName]];
             [vfxView setBlendingMode:NSVisualEffectBlendingModeBehindWindow];
             [vfxView setMaterial:NSVisualEffectMaterialUnderWindowBackground];
 
@@ -55,7 +82,8 @@ void testFunctionC2(void* windowptr) {
 
         if (hostView != nil && hostView.subviews.count) {
             NSLog(@"  Before NSVisualEffectView creation subviews.count = %lu", hostView.subviews.count);
-
+            
+            
             NSView* jfxView = hostView.subviews[0];
             // Remove jfxView from its current superview
             [jfxView removeFromSuperview];

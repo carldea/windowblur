@@ -8,7 +8,7 @@
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 
-void testFunctionC(void* windowptr);
+void testFunctionC(void* windowptr, NSString *nsAppearanceName);
 void testFunctionC2(void* windowptr);
 
 @interface WindowBlur : NSObject

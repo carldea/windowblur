@@ -1,7 +1,9 @@
 package com.carlfx.windowblur;
 
 import com.sun.jna.*;
+import com.sun.jna.platform.mac.CoreFoundation;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -33,6 +35,32 @@ public interface WindowBlurLibrary extends Library {
 
     //NativeLong objc_msgSend(NativeLong receiver, Pointer selector, NativeLong ...objAddress);
 
-    void testFunctionC(NativeLong address);
+    void testFunctionC(NativeLong address, NativeLong address2);
     void testFunctionC2(NativeLong address);
+    NativeLong stringCls = FoundationLibrary.INSTANCE.objc_getClass("NSString");
+    Pointer stringSel = FoundationLibrary.INSTANCE.sel_registerName("string");
+    Pointer allocSel = FoundationLibrary.INSTANCE.sel_registerName("alloc");
+    Pointer initWithBytesLengthEncodingSel = FoundationLibrary.INSTANCE.sel_registerName("initWithBytes:length:encoding:");
+    long NSUTF16LittleEndianStringEncoding = 0x94000100;
+
+    static String toNativeString(NativeLong nativeLong) {
+        if (NULL.equals(nativeLong)) {
+            return null;
+        }
+        CoreFoundation.CFStringRef cfString = new CoreFoundation.CFStringRef(new Pointer(nativeLong.longValue()));
+        try {
+            return CoreFoundation.INSTANCE.CFStringGetLength(cfString).intValue() > 0 ? cfString.stringValue() : "";
+        } finally {
+            cfString.release();
+        }
+    }
+    static NativeLong fromJavaString(String s) {
+        if (s.isEmpty()) {
+            return FoundationLibrary.INSTANCE.objc_msgSend(stringCls, stringSel);
+        }
+
+        byte[] utf16Bytes = s.getBytes(Charset.forName("UTF-16LE"));
+        return FoundationLibrary.INSTANCE.objc_msgSend(FoundationLibrary.INSTANCE.objc_msgSend(stringCls, allocSel),
+                initWithBytesLengthEncodingSel, utf16Bytes, utf16Bytes.length, NSUTF16LittleEndianStringEncoding);
+    }
 }
